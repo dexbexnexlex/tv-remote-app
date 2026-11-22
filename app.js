@@ -218,6 +218,7 @@ document.getElementById('tiles').addEventListener('click', (e) => {
   else if (action === 'hdmi1') sendKey('KEY_HDMI1');
   else if (action === 'hdmi2') sendKey('KEY_HDMI2');
   else if (action === 'hdmi3') sendKey('KEY_HDMI3');
+  else if (action === 'app:netflix') sendKey('KEY_NETFLIX');
   else if (action.startsWith('app:')) restLaunchApp(APP_IDS[action.slice(4)]);
 });
 
