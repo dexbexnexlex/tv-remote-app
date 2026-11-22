@@ -94,58 +94,68 @@ function tvSocketUrl(ip, token) {
 }
 
 function sendToTv(payload, { onConnect } = {}) {
-  const ip = getTvIp();
-  if (!ip) {
-    toast('Set your TV\'s IP address in Settings first');
-    openSettings();
-    return;
-  }
-  let settled = false;
-  logDebug(`Connecting to ${ip} …`);
-  const ws = new WebSocket(tvSocketUrl(ip, getTvToken()));
-
-  const failTimer = setTimeout(() => {
-    if (!settled) {
-      logDebug('Timed out waiting for ms.channel.connect');
-      toast('Could not reach the TV. Check the IP, and that you\'ve trusted its certificate once (see Settings hint).');
-      try { ws.close(); } catch (e) {}
+  return new Promise((resolve) => {
+    const ip = getTvIp();
+    if (!ip) {
+      toast('Set your TV\'s IP address in Settings first');
+      openSettings();
+      resolve();
+      return;
     }
-  }, 5000);
+    let settled = false;
+    logDebug(`Connecting to ${ip} …`);
+    const ws = new WebSocket(tvSocketUrl(ip, getTvToken()));
 
-  ws.addEventListener('message', (event) => {
-    logDebug(`recv: ${event.data}`);
-    try {
-      const msg = JSON.parse(event.data);
-      if (msg.event === 'ms.channel.connect') {
+    const failTimer = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        logDebug('Timed out waiting for ms.channel.connect');
+        toast('Could not reach the TV. Check the IP, and that you\'ve trusted its certificate once (see Settings hint).');
+        try { ws.close(); } catch (e) {}
+        resolve();
+      }
+    }, 5000);
+
+    ws.addEventListener('message', (event) => {
+      logDebug(`recv: ${event.data}`);
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.event === 'ms.channel.connect' && !settled) {
+          settled = true;
+          clearTimeout(failTimer);
+          if (msg.data && msg.data.token) {
+            localStorage.setItem('tvToken', msg.data.token);
+          }
+          if (onConnect) {
+            onConnect(ws);
+          } else {
+            logDebug(`send: ${JSON.stringify(payload)}`);
+            ws.send(JSON.stringify(payload));
+            setTimeout(() => ws.close(), 300);
+          }
+          resolve();
+        }
+      } catch (e) { /* ignore non-JSON frames */ }
+    });
+
+    ws.addEventListener('error', (e) => {
+      if (!settled) {
         settled = true;
         clearTimeout(failTimer);
-        if (msg.data && msg.data.token) {
-          localStorage.setItem('tvToken', msg.data.token);
-        }
-        if (onConnect) onConnect(ws);
-        else {
-          logDebug(`send: ${JSON.stringify(payload)}`);
-          ws.send(JSON.stringify(payload));
-          setTimeout(() => ws.close(), 600);
-        }
+        logDebug(`ws error`);
+        toast('Connection failed. See the pairing hint in Settings.');
+        resolve();
       }
-    } catch (e) { /* ignore non-JSON frames */ }
-  });
+    });
 
-  ws.addEventListener('error', (e) => {
-    settled = true;
-    clearTimeout(failTimer);
-    logDebug(`ws error`);
-    toast('Connection failed. See the pairing hint in Settings.');
-  });
-
-  ws.addEventListener('close', (e) => {
-    logDebug(`ws closed (code ${e.code})`);
+    ws.addEventListener('close', (e) => {
+      logDebug(`ws closed (code ${e.code})`);
+    });
   });
 }
 
 function sendKey(key) {
-  sendToTv({
+  return sendToTv({
     method: 'ms.remote.control',
     params: { Cmd: 'Click', DataOfCmd: key, Option: 'false', TypeOfRemote: 'SendRemoteKey' },
   });
@@ -164,12 +174,12 @@ async function navigateWithShortcut(navKey, entryKey) {
     openSettings();
     return;
   }
-  sendKey(entryKey);
+  await sendKey(entryKey);
   await sleep(1200);
   for (const step of steps) {
     const key = NAV_KEY_MAP[step];
     if (!key) continue;
-    sendKey(key);
+    await sendKey(key);
     await sleep(500);
   }
 }
