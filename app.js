@@ -166,6 +166,28 @@ function launchApp(appId) {
   });
 }
 
+function listInstalledApps() {
+  const ip = getTvIp();
+  if (!ip) { toast('Set your TV\'s IP address first'); openSettings(); return; }
+  logDebug(`Connecting to ${ip} to list apps…`);
+  const ws = new WebSocket(tvSocketUrl(ip, getTvToken()));
+  let asked = false;
+  ws.addEventListener('message', (event) => {
+    logDebug(`recv: ${event.data}`);
+    try {
+      const msg = JSON.parse(event.data);
+      if (msg.event === 'ms.channel.connect' && !asked) {
+        asked = true;
+        const query = { method: 'ms.channel.emit', params: { event: 'ed.installedApp.get', to: 'host' } };
+        logDebug(`send: ${JSON.stringify(query)}`);
+        ws.send(JSON.stringify(query));
+        setTimeout(() => ws.close(), 3000);
+      }
+    } catch (e) { /* ignore */ }
+  });
+  document.getElementById('debugLog').hidden = false;
+}
+
 function pairWithTv() {
   const ip = document.getElementById('tvIp').value.trim();
   if (!ip) { toast('Enter the TV\'s IP address first'); return; }
@@ -236,6 +258,7 @@ document.getElementById('closeSettings').addEventListener('click', () => {
   document.getElementById('settingsPanel').hidden = true;
 });
 document.getElementById('pairBtn').addEventListener('click', pairWithTv);
+document.getElementById('listAppsBtn').addEventListener('click', listInstalledApps);
 document.getElementById('toggleLogBtn').addEventListener('click', () => {
   const el = document.getElementById('debugLog');
   el.hidden = !el.hidden;
