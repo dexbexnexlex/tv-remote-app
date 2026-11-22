@@ -279,7 +279,12 @@ document.getElementById('saveLocationBtn').addEventListener('click', () => {
   toast('Location saved');
 });
 
-// ---------- Install as app ----------
+// ---------- Remove any old service worker (was causing stale-update bugs) ----------
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.getRegistrations().then((regs) => {
+    regs.forEach((r) => r.unregister());
+  });
+}
+if ('caches' in window) {
+  caches.keys().then((keys) => keys.forEach((k) => caches.delete(k)));
 }
