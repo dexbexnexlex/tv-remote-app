@@ -166,7 +166,13 @@ const NAV_KEY_MAP = { UP: 'KEY_UP', DOWN: 'KEY_DOWN', LEFT: 'KEY_LEFT', RIGHT: '
 
 function sleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
 
+let navBusy = false;
+
 async function navigateWithShortcut(navKey, entryKey) {
+  if (navBusy) {
+    toast('Still running the last shortcut — wait for it to finish');
+    return;
+  }
   const raw = localStorage.getItem(`nav_${navKey}`) || '';
   const steps = raw.split(',').map((s) => s.trim().toUpperCase()).filter(Boolean);
   if (!steps.length) {
@@ -174,13 +180,18 @@ async function navigateWithShortcut(navKey, entryKey) {
     openSettings();
     return;
   }
-  await sendKey(entryKey);
-  await sleep(1200);
-  for (const step of steps) {
-    const key = NAV_KEY_MAP[step];
-    if (!key) continue;
-    await sendKey(key);
-    await sleep(500);
+  navBusy = true;
+  try {
+    await sendKey(entryKey);
+    await sleep(1200);
+    for (const step of steps) {
+      const key = NAV_KEY_MAP[step];
+      if (!key) continue;
+      await sendKey(key);
+      await sleep(500);
+    }
+  } finally {
+    navBusy = false;
   }
 }
 
