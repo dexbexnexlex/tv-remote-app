@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#060814">
+<title>TV Remote</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="stars" aria-hidden="true"></div>
+
+<header class="top">
+  <div class="clock">
+    <div id="time" class="time">--:--</div>
+    <div id="date" class="date">Loading…</div>
+  </div>
+  <div class="weather" id="weather">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="5" stroke="#FFD166" stroke-width="1.6"/>
+      <path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" stroke="#FFD166" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+    <div class="weather-text">
+      <div id="weatherTemp">--°</div>
+      <div id="weatherPlace" class="weather-place">Set location in Settings</div>
+    </div>
+  </div>
+  <button id="settingsBtn" class="icon-btn" aria-label="Settings">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="3" stroke="#F4F6FB" stroke-width="1.6"/>
+      <path d="M19.4 13.5a7.5 7.5 0 0 0 0-3l1.8-1.3-2-3.3-2.1.7a7.6 7.6 0 0 0-2.6-1.5L14 2.5h-4l-.5 2.6a7.6 7.6 0 0 0-2.6 1.5l-2.1-.7-2 3.3L4.6 10.5a7.5 7.5 0 0 0 0 3l-1.8 1.3 2 3.3 2.1-.7a7.6 7.6 0 0 0 2.6 1.5l.5 2.6h4l.5-2.6a7.6 7.6 0 0 0 2.6-1.5l2.1.7 2-3.3-1.8-1.3Z" stroke="#F4F6FB" stroke-width="1.3" stroke-linejoin="round"/>
+    </svg>
+  </button>
+</header>
+
+<main class="tiles" id="tiles">
+  <button class="tile" data-action="guide">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="2" stroke="#9FB4FF" stroke-width="1.6"/><path d="M8 21h8M12 17v4" stroke="#9FB4FF" stroke-width="1.6" stroke-linecap="round"/></svg>
+    <span>Live TV Guide</span>
+  </button>
+  <button class="tile" data-action="app:netflix">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 3v18M18 3v18M6 3l12 18" stroke="#E5536B" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    <span>Netflix</span>
+  </button>
+  <button class="tile" data-action="app:disneyplus">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12c3-5 13-5 16 0-3 5-13 5-16 0Z" stroke="#7FB8FF" stroke-width="1.6"/><circle cx="12" cy="12" r="2" fill="#7FB8FF"/></svg>
+    <span>Disney+</span>
+  </button>
+  <button class="tile" data-action="app:youtube">
+    <svg width="44" height="34" viewBox="0 0 28 20" fill="none" aria-hidden="true"><rect x="1" y="1" width="26" height="18" rx="5" stroke="#FF6B6B" stroke-width="1.6"/><path d="M11.5 6.5l6 3.5-6 3.5v-7Z" fill="#FF6B6B"/></svg>
+    <span>YouTube</span>
+  </button>
+  <button class="tile" data-action="app:appletv">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="2" stroke="#D9D9DF" stroke-width="1.6"/><path d="M10.5 9.5l5 2.5-5 2.5v-5Z" fill="#D9D9DF"/></svg>
+    <span>Apple TV</span>
+  </button>
+  <button class="tile" data-action="hdmi1">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="7" width="18" height="10" rx="2" stroke="#8FE3C0" stroke-width="1.6"/><path d="M7 10h2M11 10h2M15 10h2M8 14h8" stroke="#8FE3C0" stroke-width="1.4" stroke-linecap="round"/></svg>
+    <span>HDMI 1</span>
+  </button>
+  <button class="tile" data-action="hdmi2">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="7" width="18" height="10" rx="2" stroke="#8FE3C0" stroke-width="1.6"/><path d="M7 10h2M11 10h2M15 10h2M8 14h8" stroke="#8FE3C0" stroke-width="1.4" stroke-linecap="round"/></svg>
+    <span>HDMI 2</span>
+  </button>
+  <button class="tile" data-action="hdmi3">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="7" width="18" height="10" rx="2" stroke="#8FE3C0" stroke-width="1.6"/><path d="M7 10h2M11 10h2M15 10h2M8 14h8" stroke="#8FE3C0" stroke-width="1.4" stroke-linecap="round"/></svg>
+    <span>HDMI 3</span>
+  </button>
+</main>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<div id="settingsPanel" class="sheet" hidden>
+  <div class="sheet-inner">
+    <h2>Settings</h2>
+
+    <label class="field">
+      <span>TV IP address</span>
+      <input id="tvIp" type="text" inputmode="decimal" placeholder="192.168.1.42" autocomplete="off">
+    </label>
+    <p class="hint">Find this on your TV: Settings → General → Network → Network Status.</p>
+
+    <button id="pairBtn" class="btn">Pair with TV</button>
+    <div id="pairStatus" class="hint"></div>
+
+    <label class="field">
+      <span>City or ZIP (for weather)</span>
+      <input id="cityInput" type="text" placeholder="e.g. Columbus, OH or 43210" autocomplete="off">
+    </label>
+    <button id="saveLocationBtn" class="btn secondary">Save location</button>
+
+    <button id="closeSettings" class="btn secondary">Close</button>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
