@@ -83,14 +83,6 @@ loadWeather();
 setInterval(loadWeather, 15 * 60 * 1000);
 
 // ---------- Samsung TV local control ----------
-// Known app IDs — verified on most 2018+ Tizen models; may differ by region/firmware.
-const APP_IDS = {
-  netflix: '3201907018807',
-  youtube: '111299001912',
-  disneyplus: '3201901017640',
-  appletv: '3201807016597',
-};
-
 function getTvIp() { return localStorage.getItem('tvIp') || ''; }
 function getTvToken() { return localStorage.getItem('tvToken') || ''; }
 
@@ -159,40 +151,26 @@ function sendKey(key) {
   });
 }
 
-function launchApp(appId) {
-  sendToTv({
-    method: 'ms.channel.emit',
-    params: { event: 'ed.apps.launch', to: 'host', data: { appId, action_type: 'NATIVE_LAUNCH' } },
-  });
-}
+// ---------- Navigate-to-app shortcuts (Home + calibrated swipe sequence) ----------
+const NAV_KEY_MAP = { UP: 'KEY_UP', DOWN: 'KEY_DOWN', LEFT: 'KEY_LEFT', RIGHT: 'KEY_RIGHT', ENTER: 'KEY_ENTER' };
 
-async function listInstalledApps() {
-  const ip = getTvIp();
-  if (!ip) { toast('Set your TV\'s IP address first'); openSettings(); return; }
-  document.getElementById('debugLog').hidden = false;
-  const url = `https://${ip}:8002/api/v2/applications/`;
-  logDebug(`REST GET ${url}`);
-  try {
-    const res = await fetch(url);
-    const text = await res.text();
-    logDebug(`REST status ${res.status}: ${text}`);
-  } catch (e) {
-    logDebug(`REST fetch failed: ${e.message}`);
+function sleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
+
+async function navigateToApp(appKey) {
+  const raw = localStorage.getItem(`nav_${appKey}`) || '';
+  const steps = raw.split(',').map((s) => s.trim().toUpperCase()).filter(Boolean);
+  if (!steps.length) {
+    toast(`No shortcut saved for this app yet — set one in Settings`);
+    openSettings();
+    return;
   }
-}
-
-async function restLaunchApp(appId) {
-  const ip = getTvIp();
-  if (!ip) { toast('Set your TV\'s IP address first'); openSettings(); return; }
-  document.getElementById('debugLog').hidden = false;
-  const url = `https://${ip}:8002/api/v2/applications/${appId}`;
-  logDebug(`REST POST ${url}`);
-  try {
-    const res = await fetch(url, { method: 'POST' });
-    const text = await res.text();
-    logDebug(`REST status ${res.status}: ${text}`);
-  } catch (e) {
-    logDebug(`REST fetch failed: ${e.message}`);
+  sendKey('KEY_HOME');
+  await sleep(1200);
+  for (const step of steps) {
+    const key = NAV_KEY_MAP[step];
+    if (!key) continue;
+    sendKey(key);
+    await sleep(500);
   }
 }
 
@@ -219,7 +197,7 @@ document.getElementById('tiles').addEventListener('click', (e) => {
   else if (action === 'hdmi2') sendKey('KEY_HDMI2');
   else if (action === 'hdmi3') sendKey('KEY_HDMI3');
   else if (action === 'app:netflix') sendKey('KEY_NETFLIX');
-  else if (action.startsWith('app:')) restLaunchApp(APP_IDS[action.slice(4)]);
+  else if (action.startsWith('app:')) navigateToApp(action.slice(4));
 });
 
 // ---------- Touchpad (swipe to navigate, tap to select) ----------
@@ -259,6 +237,9 @@ document.querySelectorAll('.padBtn').forEach((btn) => {
 function openSettings() {
   document.getElementById('tvIp').value = getTvIp();
   document.getElementById('cityInput').value = localStorage.getItem('weatherCity') || '';
+  document.getElementById('navDisneyplus').value = localStorage.getItem('nav_disneyplus') || '';
+  document.getElementById('navAppletv').value = localStorage.getItem('nav_appletv') || '';
+  document.getElementById('navYoutube').value = localStorage.getItem('nav_youtube') || '';
   document.getElementById('pairStatus').textContent = '';
   document.getElementById('settingsPanel').hidden = false;
 }
@@ -267,7 +248,12 @@ document.getElementById('closeSettings').addEventListener('click', () => {
   document.getElementById('settingsPanel').hidden = true;
 });
 document.getElementById('pairBtn').addEventListener('click', pairWithTv);
-document.getElementById('listAppsBtn').addEventListener('click', listInstalledApps);
+document.getElementById('saveShortcutsBtn').addEventListener('click', () => {
+  localStorage.setItem('nav_disneyplus', document.getElementById('navDisneyplus').value.trim());
+  localStorage.setItem('nav_appletv', document.getElementById('navAppletv').value.trim());
+  localStorage.setItem('nav_youtube', document.getElementById('navYoutube').value.trim());
+  toast('Shortcuts saved');
+});
 document.getElementById('toggleLogBtn').addEventListener('click', () => {
   const el = document.getElementById('debugLog');
   el.hidden = !el.hidden;

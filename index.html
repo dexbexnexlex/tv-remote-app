@@ -103,7 +103,22 @@
     </label>
     <button id="saveLocationBtn" class="btn secondary">Save location</button>
 
-    <button id="listAppsBtn" class="btn secondary">List Installed Apps</button>
+    <p class="hint">To make Disney+ / Apple TV / YouTube one-tap: press <strong>Home</strong> below, use the touchpad to navigate to that app, and count the moves (e.g. "right, right, down, select"). Enter that as a shortcut here, comma-separated (UP/DOWN/LEFT/RIGHT/ENTER).</p>
+
+    <label class="field">
+      <span>Disney+ shortcut</span>
+      <input id="navDisneyplus" type="text" placeholder="e.g. RIGHT,RIGHT,ENTER" autocomplete="off">
+    </label>
+    <label class="field">
+      <span>Apple TV shortcut</span>
+      <input id="navAppletv" type="text" placeholder="e.g. RIGHT,RIGHT,RIGHT,ENTER" autocomplete="off">
+    </label>
+    <label class="field">
+      <span>YouTube shortcut</span>
+      <input id="navYoutube" type="text" placeholder="e.g. DOWN,RIGHT,ENTER" autocomplete="off">
+    </label>
+    <button id="saveShortcutsBtn" class="btn secondary">Save Shortcuts</button>
+
     <button id="toggleLogBtn" class="btn secondary">Show Debug Log</button>
     <pre id="debugLog" class="debugLog" hidden></pre>
 
