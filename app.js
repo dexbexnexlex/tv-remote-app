@@ -156,15 +156,15 @@ const NAV_KEY_MAP = { UP: 'KEY_UP', DOWN: 'KEY_DOWN', LEFT: 'KEY_LEFT', RIGHT: '
 
 function sleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
 
-async function navigateToApp(appKey) {
-  const raw = localStorage.getItem(`nav_${appKey}`) || '';
+async function navigateWithShortcut(navKey, entryKey) {
+  const raw = localStorage.getItem(`nav_${navKey}`) || '';
   const steps = raw.split(',').map((s) => s.trim().toUpperCase()).filter(Boolean);
   if (!steps.length) {
-    toast(`No shortcut saved for this app yet — set one in Settings`);
+    toast(`No shortcut saved yet — set one in Settings`);
     openSettings();
     return;
   }
-  sendKey('KEY_HOME');
+  sendKey(entryKey);
   await sleep(1200);
   for (const step of steps) {
     const key = NAV_KEY_MAP[step];
@@ -193,11 +193,11 @@ document.getElementById('tiles').addEventListener('click', (e) => {
   if (!btn) return;
   const action = btn.dataset.action;
   if (action === 'guide') sendKey('KEY_GUIDE');
-  else if (action === 'hdmi1') sendKey('KEY_HDMI1');
-  else if (action === 'hdmi2') sendKey('KEY_HDMI2');
-  else if (action === 'hdmi3') sendKey('KEY_HDMI3');
+  else if (action === 'hdmi1') navigateWithShortcut('hdmi1', 'KEY_SOURCE');
+  else if (action === 'hdmi2') navigateWithShortcut('hdmi2', 'KEY_SOURCE');
+  else if (action === 'hdmi3') navigateWithShortcut('hdmi3', 'KEY_SOURCE');
   else if (action === 'app:netflix') sendKey('KEY_NETFLIX');
-  else if (action.startsWith('app:')) navigateToApp(action.slice(4));
+  else if (action.startsWith('app:')) navigateWithShortcut(action.slice(4), 'KEY_HOME');
 });
 
 // ---------- Touchpad (swipe to navigate, tap to select) ----------
@@ -240,6 +240,9 @@ function openSettings() {
   document.getElementById('navDisneyplus').value = localStorage.getItem('nav_disneyplus') || '';
   document.getElementById('navAppletv').value = localStorage.getItem('nav_appletv') || '';
   document.getElementById('navYoutube').value = localStorage.getItem('nav_youtube') || '';
+  document.getElementById('navHdmi1').value = localStorage.getItem('nav_hdmi1') || '';
+  document.getElementById('navHdmi2').value = localStorage.getItem('nav_hdmi2') || '';
+  document.getElementById('navHdmi3').value = localStorage.getItem('nav_hdmi3') || '';
   document.getElementById('pairStatus').textContent = '';
   document.getElementById('settingsPanel').hidden = false;
 }
@@ -252,6 +255,9 @@ document.getElementById('saveShortcutsBtn').addEventListener('click', () => {
   localStorage.setItem('nav_disneyplus', document.getElementById('navDisneyplus').value.trim());
   localStorage.setItem('nav_appletv', document.getElementById('navAppletv').value.trim());
   localStorage.setItem('nav_youtube', document.getElementById('navYoutube').value.trim());
+  localStorage.setItem('nav_hdmi1', document.getElementById('navHdmi1').value.trim());
+  localStorage.setItem('nav_hdmi2', document.getElementById('navHdmi2').value.trim());
+  localStorage.setItem('nav_hdmi3', document.getElementById('navHdmi3').value.trim());
   toast('Shortcuts saved');
 });
 document.getElementById('toggleLogBtn').addEventListener('click', () => {

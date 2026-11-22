@@ -79,6 +79,7 @@
   <div class="padButtons">
     <button class="padBtn" data-key="KEY_RETURN">Back</button>
     <button class="padBtn" data-key="KEY_HOME">Home</button>
+    <button class="padBtn" data-key="KEY_SOURCE">Source</button>
   </div>
 </section>
 
@@ -103,19 +104,31 @@
     </label>
     <button id="saveLocationBtn" class="btn secondary">Save location</button>
 
-    <p class="hint">To make Disney+ / Apple TV / YouTube one-tap: press <strong>Home</strong> below, use the touchpad to navigate to that app, and count the moves (e.g. "right, right, down, select"). Enter that as a shortcut here, comma-separated (UP/DOWN/LEFT/RIGHT/ENTER).</p>
+    <p class="hint">To make Disney+ / Apple TV / YouTube one-tap: press <strong>Home</strong> below, use the touchpad to navigate to that app, and count the moves (e.g. "right, right, down, select"). For HDMI 1/2/3, press <strong>Source</strong> instead. Enter the moves as a shortcut here, comma-separated (UP/DOWN/LEFT/RIGHT/ENTER).</p>
 
     <label class="field">
-      <span>Disney+ shortcut</span>
+      <span>Disney+ shortcut (after Home)</span>
       <input id="navDisneyplus" type="text" placeholder="e.g. RIGHT,RIGHT,ENTER" autocomplete="off">
     </label>
     <label class="field">
-      <span>Apple TV shortcut</span>
+      <span>Apple TV shortcut (after Home)</span>
       <input id="navAppletv" type="text" placeholder="e.g. RIGHT,RIGHT,RIGHT,ENTER" autocomplete="off">
     </label>
     <label class="field">
-      <span>YouTube shortcut</span>
+      <span>YouTube shortcut (after Home)</span>
       <input id="navYoutube" type="text" placeholder="e.g. DOWN,RIGHT,ENTER" autocomplete="off">
+    </label>
+    <label class="field">
+      <span>HDMI 1 shortcut (after Source)</span>
+      <input id="navHdmi1" type="text" placeholder="e.g. ENTER" autocomplete="off">
+    </label>
+    <label class="field">
+      <span>HDMI 2 shortcut (after Source)</span>
+      <input id="navHdmi2" type="text" placeholder="e.g. RIGHT,ENTER" autocomplete="off">
+    </label>
+    <label class="field">
+      <span>HDMI 3 shortcut (after Source)</span>
+      <input id="navHdmi3" type="text" placeholder="e.g. RIGHT,RIGHT,ENTER" autocomplete="off">
     </label>
     <button id="saveShortcutsBtn" class="btn secondary">Save Shortcuts</button>
 
