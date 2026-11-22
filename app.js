@@ -7,6 +7,16 @@ function tickClock() {
 tickClock();
 setInterval(tickClock, 15000);
 
+// ---------- Debug log ----------
+const debugLines = [];
+function logDebug(msg) {
+  const time = new Date().toLocaleTimeString([], { hour12: false });
+  debugLines.push(`[${time}] ${msg}`);
+  if (debugLines.length > 40) debugLines.shift();
+  const el = document.getElementById('debugLog');
+  if (el) { el.textContent = debugLines.join('\n'); el.scrollTop = el.scrollHeight; }
+}
+
 // ---------- Toast ----------
 let toastTimer = null;
 function toast(msg, ms = 2600) {
@@ -99,16 +109,19 @@ function sendToTv(payload, { onConnect } = {}) {
     return;
   }
   let settled = false;
+  logDebug(`Connecting to ${ip} …`);
   const ws = new WebSocket(tvSocketUrl(ip, getTvToken()));
 
   const failTimer = setTimeout(() => {
     if (!settled) {
+      logDebug('Timed out waiting for ms.channel.connect');
       toast('Could not reach the TV. Check the IP, and that you\'ve trusted its certificate once (see Settings hint).');
       try { ws.close(); } catch (e) {}
     }
   }, 5000);
 
   ws.addEventListener('message', (event) => {
+    logDebug(`recv: ${event.data}`);
     try {
       const msg = JSON.parse(event.data);
       if (msg.event === 'ms.channel.connect') {
@@ -119,17 +132,23 @@ function sendToTv(payload, { onConnect } = {}) {
         }
         if (onConnect) onConnect(ws);
         else {
+          logDebug(`send: ${JSON.stringify(payload)}`);
           ws.send(JSON.stringify(payload));
-          setTimeout(() => ws.close(), 400);
+          setTimeout(() => ws.close(), 600);
         }
       }
     } catch (e) { /* ignore non-JSON frames */ }
   });
 
-  ws.addEventListener('error', () => {
+  ws.addEventListener('error', (e) => {
     settled = true;
     clearTimeout(failTimer);
+    logDebug(`ws error`);
     toast('Connection failed. See the pairing hint in Settings.');
+  });
+
+  ws.addEventListener('close', (e) => {
+    logDebug(`ws closed (code ${e.code})`);
   });
 }
 
@@ -172,6 +191,39 @@ document.getElementById('tiles').addEventListener('click', (e) => {
   else if (action.startsWith('app:')) launchApp(APP_IDS[action.slice(4)]);
 });
 
+// ---------- Touchpad (swipe to navigate, tap to select) ----------
+const touchpad = document.getElementById('touchpad');
+let padStart = null;
+touchpad.addEventListener('pointerdown', (e) => {
+  padStart = { x: e.clientX, y: e.clientY };
+  touchpad.classList.add('active');
+});
+touchpad.addEventListener('pointerup', (e) => {
+  touchpad.classList.remove('active');
+  if (!padStart) return;
+  const dx = e.clientX - padStart.x;
+  const dy = e.clientY - padStart.y;
+  padStart = null;
+  const threshold = 24;
+  if (Math.abs(dx) < threshold && Math.abs(dy) < threshold) {
+    sendKey('KEY_ENTER');
+    return;
+  }
+  if (Math.abs(dx) > Math.abs(dy)) {
+    sendKey(dx > 0 ? 'KEY_RIGHT' : 'KEY_LEFT');
+  } else {
+    sendKey(dy > 0 ? 'KEY_DOWN' : 'KEY_UP');
+  }
+});
+touchpad.addEventListener('pointercancel', () => {
+  touchpad.classList.remove('active');
+  padStart = null;
+});
+
+document.querySelectorAll('.padBtn').forEach((btn) => {
+  btn.addEventListener('click', () => sendKey(btn.dataset.key));
+});
+
 // ---------- Settings sheet ----------
 function openSettings() {
   document.getElementById('tvIp').value = getTvIp();
@@ -184,6 +236,10 @@ document.getElementById('closeSettings').addEventListener('click', () => {
   document.getElementById('settingsPanel').hidden = true;
 });
 document.getElementById('pairBtn').addEventListener('click', pairWithTv);
+document.getElementById('toggleLogBtn').addEventListener('click', () => {
+  const el = document.getElementById('debugLog');
+  el.hidden = !el.hidden;
+});
 document.getElementById('saveLocationBtn').addEventListener('click', () => {
   const city = document.getElementById('cityInput').value.trim();
   if (city) localStorage.setItem('weatherCity', city);

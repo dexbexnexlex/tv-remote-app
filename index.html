@@ -72,6 +72,16 @@
   </button>
 </main>
 
+<section class="padSection">
+  <div id="touchpad" class="touchpad">
+    <span>Swipe to navigate · Tap to select</span>
+  </div>
+  <div class="padButtons">
+    <button class="padBtn" data-key="KEY_RETURN">Back</button>
+    <button class="padBtn" data-key="KEY_HOME">Home</button>
+  </div>
+</section>
+
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <div id="settingsPanel" class="sheet" hidden>
@@ -92,6 +102,9 @@
       <input id="cityInput" type="text" placeholder="e.g. Columbus, OH or 43210" autocomplete="off">
     </label>
     <button id="saveLocationBtn" class="btn secondary">Save location</button>
+
+    <button id="toggleLogBtn" class="btn secondary">Show Debug Log</button>
+    <pre id="debugLog" class="debugLog" hidden></pre>
 
     <button id="closeSettings" class="btn secondary">Close</button>
   </div>
