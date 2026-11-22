@@ -166,26 +166,34 @@ function launchApp(appId) {
   });
 }
 
-function listInstalledApps() {
+async function listInstalledApps() {
   const ip = getTvIp();
   if (!ip) { toast('Set your TV\'s IP address first'); openSettings(); return; }
-  logDebug(`Connecting to ${ip} to list apps…`);
-  const ws = new WebSocket(tvSocketUrl(ip, getTvToken()));
-  let asked = false;
-  ws.addEventListener('message', (event) => {
-    logDebug(`recv: ${event.data}`);
-    try {
-      const msg = JSON.parse(event.data);
-      if (msg.event === 'ms.channel.connect' && !asked) {
-        asked = true;
-        const query = { method: 'ms.channel.emit', params: { event: 'ed.installedApp.get', to: 'host' } };
-        logDebug(`send: ${JSON.stringify(query)}`);
-        ws.send(JSON.stringify(query));
-        setTimeout(() => ws.close(), 3000);
-      }
-    } catch (e) { /* ignore */ }
-  });
   document.getElementById('debugLog').hidden = false;
+  const url = `https://${ip}:8002/api/v2/applications/`;
+  logDebug(`REST GET ${url}`);
+  try {
+    const res = await fetch(url);
+    const text = await res.text();
+    logDebug(`REST status ${res.status}: ${text}`);
+  } catch (e) {
+    logDebug(`REST fetch failed: ${e.message}`);
+  }
+}
+
+async function restLaunchApp(appId) {
+  const ip = getTvIp();
+  if (!ip) { toast('Set your TV\'s IP address first'); openSettings(); return; }
+  document.getElementById('debugLog').hidden = false;
+  const url = `https://${ip}:8002/api/v2/applications/${appId}`;
+  logDebug(`REST POST ${url}`);
+  try {
+    const res = await fetch(url, { method: 'POST' });
+    const text = await res.text();
+    logDebug(`REST status ${res.status}: ${text}`);
+  } catch (e) {
+    logDebug(`REST fetch failed: ${e.message}`);
+  }
 }
 
 function pairWithTv() {
@@ -210,7 +218,7 @@ document.getElementById('tiles').addEventListener('click', (e) => {
   else if (action === 'hdmi1') sendKey('KEY_HDMI1');
   else if (action === 'hdmi2') sendKey('KEY_HDMI2');
   else if (action === 'hdmi3') sendKey('KEY_HDMI3');
-  else if (action.startsWith('app:')) launchApp(APP_IDS[action.slice(4)]);
+  else if (action.startsWith('app:')) restLaunchApp(APP_IDS[action.slice(4)]);
 });
 
 // ---------- Touchpad (swipe to navigate, tap to select) ----------
